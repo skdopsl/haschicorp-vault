@@ -1,0 +1,74 @@
+1)ways of authentication to vault
+2)secrets management - secret engine
+3)policies
+4)audit
+
+Authentication method:
+====================
+we acn authenticate using token, role base/app role, userpass and  can integrate to any other third part like okta, ladp, IAM....
+    external methods can be provided by plugins
+    all the authentication methods mounted on api path which is /sys/auth
+username & password --> best for humans opertaors
+Approle method --> good for m/cs, applications, consists of role id and secrets,  we can push or pull sevret id.
+
+REF-Use cases, screnn shots.
+
+vault server authentication from power shell
+================================
+1)vault server -dev
+2)$env:VAULT_ADDR="http://127.0.0.1:8200"
+3)vault login 
+4)vault auth list
+5)vault auth enable userpass(or)approle
+6)vault auth tune -description="Globomantics Userpass" userpass/
+    vault auth tune -description="Globomantics AppRole" GloboAppRole/
+
+To create user name & pasword for userpass auth:
+================================================
+$ vault path-help auth/userpass/ 
+    $ vault path-help auth/usernamepassword/users
+    $vault path-help auth/approle
+creating user under auth userpass
+    $ vault write auth/usernamepassword/users/ned password=tacos
+
+Role cretion:
+=============
+Role creation can not be done through UI only from CLI we can do it.
+    $ vault write auth/GloboAppRole/role/webapp role_name="webapp" secret_id_num_uses=1 secret_id_ttl=2h
+
+vault with login with creted users:
+===================================
+-> take new powershell window
+ $ env:VAULT_ADDR="http://127.0.0.1:8200"
+ $ vault login -method=userpass username=ned
+
+To check roles login:
+===================
+ $ vault path-help auth/GloboAppRole/login
+ $ vault read auth/GloboAppRole/role/webapp/role-id
+ $ $roleId="ROLEID"  --> paste rpole id here
+ NOw generate secret id for role id
+ $ vault write -force auth/GloboAppRole/role/webapp/secret-id
+ $secretId="SECRETID"
+Now login using role id & secret id
+$ vault write auth/GloboAppRole/login role_id=$roleId secret_id=$secretId
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Lastly, let's try logging in using the API with AppRole instead
+
+#Create the data string
+$data=@"
+{
+  "role_id": "$roleId",
+  "secret_id": "$secretId"
+}
+"@
+
+$resp = Invoke-WebRequest  -Method Post -Uri "$env:VAULT_ADDR/v1/auth/GloboAppRole/login" `
+  -UseBasicParsing -Body $data
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+  Disabling auth methods:
+  =======================
+   $ vault auth disable GloboAppRole/

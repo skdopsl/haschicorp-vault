@@ -1,0 +1,39 @@
+vault written in Go lang and same binary file for both client and server 
+
+During learning we use vault in DEV mode-> dev server is built in pre-configured which is not much secure
+In dev mode, data is Non-persistant bcz no secrent engine configured.
+In dev mode which automatically unseals vault, sets up in-memory storage for secrets.
+
+For windows Download :
+=====================
+1- download developer mode of vault:
+    https://releases.hashicorp.com/vault/1.17.1/vault_1.17.1_windows_386.zip
+2-set paths
+    environmnet variable -> path(edit) -> add vault path
+3- in command prompt
+ $ vault
+ $ where vault
+ $ vault version
+4- to start vault in dev mode
+ $ vault -help
+ $ vault server -help
+ $ vaulr server -dev
+   port is 8200
+   once started it will show unseal key & root token
+5- vault server login  
+    # Open a second console and save the token in a variable
+    # DO NOT USE VAULT_TOKEN for the variable name
+    # powershell
+    $root_token="ROOT_TOKEN_VALUE"
+   
+
+    # command line
+    set root_token="ROOT_TOKEN_VALUE"
+    set VAULT_ADDR=http://127.0.0.1:8200
+        this for quick access to vault, to set permanently set them in environmnet variable
+    to login to vault server:
+     # commnad promt
+        vault login -address="http://127.0.0.1:8200" %root_token%
+    # powershell
+        vault login -address="http://127.0.0.1:8200" $root_token
+
